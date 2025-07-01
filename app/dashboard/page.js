@@ -1,78 +1,56 @@
-import React from "react";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import cookieSignature from "cookie-signature";
+import React from 'react';
+import clientPromise from '../../lib/mongodb';
 
-import fs from "fs/promises";
-import path from "path";
+export default async function Dashboard() {
+  try {
+    const client = await clientPromise;
+    const db = client.db();
 
-const DATA_FILE = path.join(process.cwd(), "data", "tracking.json");
+    const collection = db.collection('tracking');
 
-async function Page() {
-	const cookieStore = await cookies();
-	const authCookie = cookieStore.get("auth")?.value;
+    // Aggregate to get count and last opened per id
+    const aggregatedData = await collection.aggregate([
+      {
+        $group: {
+          _id: '$id',
+          count: { $sum: 1 },
+          lastOpened: { $max: '$time' },
+        },
+      },
+      { $sort: { lastOpened: -1 } },
+    ]).toArray();
 
-	if (!verifyCookie(authCookie)) redirect("/login");
-
-	function verifyCookie(cookie) {
-		if (!cookie) return false;
-		const val = cookieSignature.unsign(cookie, process.env.COOKIE_SECRET);
-		return val === "yes";
-	}
-
-	let data = [];
-	try {
-		const file = await fs.readFile(DATA_FILE, "utf-8");
-		data = JSON.parse(file);
-	} catch (err) {}
-
-	const agg = data.reduce((acc, { id, time }) => {
-		if (!acc[id]) {
-			acc[id] = { id, count: 0, lastOpened: null };
-		}
-		acc[id].count += 1;
-		if (!acc[id].lastOpened || new Date(time) > new Date(acc[id].lastOpened)) {
-			acc[id].lastOpened = time;
-		}
-		return acc;
-	}, {});
-
-    const aggregatedData = Object.values(agg);
-
-	return (
-		<div className="flex flex-col justify-center items-center">
-      <h1>Email Opens Tracking</h1>
-      <table className="w-full border-collapse text-gray-200 font-sans">
-  <thead>
-    <tr className="bg-gray-800">
-      <th className="p-3 text-left border-b border-gray-700">ID</th>
-      <th className="p-3 text-right border-b border-gray-700">Times Opened</th>
-      <th className="p-3 text-left border-b border-gray-700">Last Opened</th>
-    </tr>
-  </thead>
-  <tbody>
-    {aggregatedData.length === 0 && (
-      <tr>
-        <td colSpan={3} className="p-4 text-center text-gray-400">
-          No data yet
-        </td>
-      </tr>
-    )}
-    {aggregatedData.map(({ id, count, lastOpened }, i) => (
-      <tr
-        key={i}
-        className={i % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'}
-      >
-        <td className="p-3 border-b border-gray-700">{id}</td>
-        <td className="p-3 border-b border-gray-700 text-right font-semibold">{count}</td>
-        <td className="p-3 border-b border-gray-700">{new Date(lastOpened).toLocaleString()}</td>
-      </tr>
-    ))}
-  </tbody>
-</table>
-
-    </div>
-	);
+    return (
+      <div className="p-8">
+        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+        <table className="min-w-full border-collapse border border-gray-600">
+          <thead>
+            <tr className="bg-gray-800 text-white">
+              <th className="border border-gray-600 px-4 py-2 text-left">ID</th>
+              <th className="border border-gray-600 px-4 py-2 text-left">Times Opened</th>
+              <th className="border border-gray-600 px-4 py-2 text-left">Last Opened</th>
+            </tr>
+          </thead>
+          <tbody>
+            {aggregatedData.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="border border-gray-600 px-4 py-2 text-center">No data yet</td>
+              </tr>
+            ) : (
+              aggregatedData.map(({ _id, count, lastOpened }) => (
+                <tr key={_id} className="even:bg-gray-700">
+                  <td className="border border-gray-600 px-4 py-2">{_id}</td>
+                  <td className="border border-gray-600 px-4 py-2">{count}</td>
+                  <td className="border border-gray-600 px-4 py-2">{new Date(lastOpened).toLocaleString()}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  } catch (error) {
+    console.error(error);
+    return <div>Error loading dashboard</div>;
+  }
 }
-
-export default Page;
