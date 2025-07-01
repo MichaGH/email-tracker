@@ -40,31 +40,37 @@ async function Page() {
     const aggregatedData = Object.values(agg);
 
 	return (
-		<div className="h-screen w-screen flex flex-col justify-center items-center">
+		<div className="flex flex-col justify-center items-center">
       <h1>Email Opens Tracking</h1>
-      <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Times Opened</th>
-            <th>Last Opened</th>
-          </tr>
-        </thead>
-        <tbody>
-          {aggregatedData.length === 0 && (
-            <tr>
-              <td colSpan={3}>No data yet</td>
-            </tr>
-          )}
-          {aggregatedData.map(({ id, count, lastOpened }, i) => (
-            <tr key={i}>
-              <td>{id}</td>
-              <td>{count}</td>
-              <td>{new Date(lastOpened).toLocaleString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <table className="w-full border-collapse text-gray-200 font-sans">
+  <thead>
+    <tr className="bg-gray-800">
+      <th className="p-3 text-left border-b border-gray-700">ID</th>
+      <th className="p-3 text-right border-b border-gray-700">Times Opened</th>
+      <th className="p-3 text-left border-b border-gray-700">Last Opened</th>
+    </tr>
+  </thead>
+  <tbody>
+    {aggregatedData.length === 0 && (
+      <tr>
+        <td colSpan={3} className="p-4 text-center text-gray-400">
+          No data yet
+        </td>
+      </tr>
+    )}
+    {aggregatedData.map(({ id, count, lastOpened }, i) => (
+      <tr
+        key={i}
+        className={i % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'}
+      >
+        <td className="p-3 border-b border-gray-700">{id}</td>
+        <td className="p-3 border-b border-gray-700 text-right font-semibold">{count}</td>
+        <td className="p-3 border-b border-gray-700">{new Date(lastOpened).toLocaleString()}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
     </div>
 	);
 }
