@@ -8,7 +8,7 @@ import path from "path";
 
 const DATA_FILE = path.join(process.cwd(), "data", "tracking.json");
 
-async function page() {
+async function Page() {
 	const cookieStore = await cookies();
 	const authCookie = cookieStore.get("auth")?.value;
 
@@ -69,4 +69,4 @@ async function page() {
 	);
 }
 
-export default page;
+export default Page;
