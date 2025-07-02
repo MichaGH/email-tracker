@@ -1,58 +1,94 @@
 export const revalidate = 0;
 
-import React from 'react';
-import clientPromise from '../../lib/mongodb';
+import React from "react";
+import { redirect, RedirectType } from "next/navigation";
+
+import { getDb } from "../../lib/mongodb";
+import { validateAuth } from "@/lib/auth";
+
+import TrackingTable from "@/components/TrackingTable";
+import CreateTrackerForm from "@/components/CreateTrackerForm";
+import EntriesTable from "@/components/EntriesTable";
+import DashboardClient from "@/components/DashboardClient";
 
 export default async function Dashboard() {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
+	//! Validate Auth Cookie
+	if (!validateAuth()) {
+		redirect("/login", RedirectType.push);
+	}
 
-    const collection = db.collection('tracking');
+	//! Get both: aggregated tracking data & prepare DB insert
+	let aggregatedData = [];
+	try {
+		const db = await getDb();
 
-    // Aggregate to get count and last opened per id
-    const aggregatedData = await collection.aggregate([
-      {
-        $group: {
-          _id: '$id',
-          count: { $sum: 1 },
-          lastOpened: { $max: '$time' },
-        },
-      },
-      { $sort: { lastOpened: -1 } },
-    ]).toArray();
+		// Get tracking activity counts
+		aggregatedData = await db
+			.collection("trackers")
+			.aggregate([
+				{
+					$lookup: {
+						from: "trackerEntries",
+						localField: "_id",
+						foreignField: "trackerId",
+						as: "entries",
+					},
+				},
+				{
+					$addFields: {
+						count: { $size: "$entries" },
+						lastEntry: { $max: "$entries.timestamp" },
+					},
+				},
+				{
+					$project: {
+						entries: 0, // exclude raw entries array
+					},
+				},
+				{
+					$sort: { lastEntry: -1 },
+				},
+			])
+			.toArray();
+	} catch (error) {
+		console.error("Failed to load tracking data:", error);
+	}
 
-    return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-        <table className="min-w-full border-collapse border border-gray-600">
-          <thead>
-            <tr className="bg-gray-800 text-white">
-              <th className="border border-gray-600 px-4 py-2 text-left">ID</th>
-              <th className="border border-gray-600 px-4 py-2 text-left">Times Opened</th>
-              <th className="border border-gray-600 px-4 py-2 text-left">Last Opened</th>
-            </tr>
-          </thead>
-          <tbody>
-            {aggregatedData.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="border border-gray-600 px-4 py-2 text-center">No data yet</td>
-              </tr>
-            ) : (
-              aggregatedData.map(({ _id, count, lastOpened }) => (
-                <tr key={_id} className="even:bg-gray-700">
-                  <td className="border border-gray-600 px-4 py-2">{_id}</td>
-                  <td className="border border-gray-600 px-4 py-2">{count}</td>
-                  <td className="border border-gray-600 px-4 py-2">{new Date(lastOpened).toLocaleString()}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    );
-  } catch (error) {
-    console.error(error);
-    return <div>Error loading dashboard</div>;
-  }
+	//! Server Action: Create a new tracker
+	async function createTracker(formData) {
+		"use server";
+
+		const _id = formData.get("id")?.trim();
+		const description = formData.get("description") || "";
+		const active = formData.get("active") === "on";
+		const track = formData.get("track") === "on";
+		const respond = formData.get("respond") === "on";
+		const source = formData.get("source") || "";
+
+		const doc = {
+			_id,
+			description,
+			active,
+			track,
+			respond,
+			source,
+			createdAt: new Date(),
+		};
+
+		try {
+			const db = await getDb();
+			await db.collection("trackers").insertOne(doc);
+			console.log("Created tracker:", _id);
+		} catch (err) {
+			console.error("Error creating tracker:", err);
+		}
+	}
+
+	return (
+		<div className="p-8">
+			<h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+
+			<DashboardClient aggregatedData={aggregatedData} createTracker={createTracker} />
+		</div>
+	);
 }

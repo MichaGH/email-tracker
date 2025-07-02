@@ -7,8 +7,8 @@ export async function POST(request) {
     const { password } = await request.json();
     const SECRET = process.env.COOKIE_SECRET;
 
-    console.log('password:', password)
-    if( password === process.env.ADMIN_PASSWORD) {
+
+    if( password === process.env.ADMIN_PASSWORD ) {
         const signed = cookieSignature.sign('yes', process.env.COOKIE_SECRET);
 
         const cookie = serialize('auth', signed, {

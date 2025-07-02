@@ -27,14 +27,18 @@ function Page() {
 	return (
 		<section className="w-screen h-screen flex justify-center items-center">
 			<div>
-				<form action="" onSubmit={handleSubmit} className="flex space-x-4">
-					
-					<input 
-                        type="password" 
-                        name="password"
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="border-2 border-white rounded-sm"
-                        />
+				<form action="" onSubmit={handleSubmit} className="flex space-y-2 flex-col *:flex *:flex-col">
+                    <h1> Please Login </h1>
+
+                    <div>
+                        <label htmlFor="password">Password</label>
+                        <input 
+                            type="password" 
+                            name="password"
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="border-2 border-white rounded-sm"
+                            />
+                    </div>
 					<button type="submit" className="bg-cyan-800 rounded-sm px-4 py-2">Log In</button>
 				</form>
 			</div>
