@@ -1,14 +1,12 @@
 export const revalidate = 0;
 
 import React from "react";
-import { redirect, RedirectType } from "next/navigation";
+import { redirect, RedirectType} from "next/navigation";
 
 import { getDb } from "../../lib/mongodb";
 import { validateAuth } from "@/lib/auth";
 
-import TrackingTable from "@/components/TrackingTable";
-import CreateTrackerForm from "@/components/CreateTrackerForm";
-import EntriesTable from "@/components/EntriesTable";
+
 import DashboardClient from "@/components/DashboardClient";
 
 export default async function Dashboard() {
