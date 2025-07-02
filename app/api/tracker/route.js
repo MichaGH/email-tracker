@@ -66,14 +66,6 @@ export async function GET(request) {
 				ip,
 				location
 			});
-
-         /*    //! Update Tracker lastActive
-            await trackersCollection.updateOne(
-                {_id: existingTracker._id},
-                { $set: {lastEntry: timestamp}}
-            )
- */
-            //
 		}
 
         //* Respond with image?
@@ -83,7 +75,7 @@ export async function GET(request) {
         }
 
         //YES
-		//! What image to respond with | default: src: 'trackingPixel'
+		//! What image to respond with | default: source: 'trackingPixel'
 		let responseImage;
         let contentType = "image/gif";
         const source = existingTracker.source;

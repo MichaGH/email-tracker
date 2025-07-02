@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import DeleteEntry from "./UI/DeleteEntry";
 
 export default function EntriesTable({ selectedTrackerId }) {
 	const [entries, setEntries] = useState([]);
@@ -54,6 +55,9 @@ export default function EntriesTable({ selectedTrackerId }) {
 						<th className="border border-gray-600 px-4 py-2 text-left">
 							Country
 						</th>
+						<th className="border border-gray-600 px-4 py-2 text-center">
+							Delete
+						</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -72,7 +76,10 @@ export default function EntriesTable({ selectedTrackerId }) {
 								{location?.region || "N/A"}
 							</td>
 							<td className="border border-gray-600 px-4 py-2">
-								{location?.country || "N/A"}
+								{location?.country || "N/A"} 
+							</td>
+							<td className="border border-gray-600 text-center">
+								<DeleteEntry entryId={_id} fetchEntries={fetchEntries}/>
 							</td>
 						</tr>
 					))}

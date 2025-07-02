@@ -10,7 +10,13 @@ function TrackingTable({ aggregatedData,selectedTrackerId, setSelectedTrackerId}
   } else {
     alert('Clipboard API not supported');
   }
+
 }
+
+  function handleCopyClick(e, url){
+    copyToClipboard(url)
+    e.stopPropagation()
+  }
 
   return (
     <table className="min-w-full border-collapse border border-gray-600">
@@ -84,7 +90,7 @@ function TrackingTable({ aggregatedData,selectedTrackerId, setSelectedTrackerId}
                 <td className="border border-gray-600 px-4 py-2">
                   <button
                     className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded"
-                    onClick={() => copyToClipboard(`${window.location.origin}/api/tracker/?id=${_id}`)}
+                    onClick={(e) => handleCopyClick(e, `${window.location.origin}/api/tracker/?id=${_id}`)}
                   >
                     Copy
                   </button>

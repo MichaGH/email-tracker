@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 export async function PATCH(req) {
     try {
         const { trackerId, field, value } = await req.json();
-        console.log('Requested updateTrackerField')
         const db = await getDb();
         await db.collection("trackers").updateOne({ _id: trackerId }, { $set: { [field]: value } });
 
