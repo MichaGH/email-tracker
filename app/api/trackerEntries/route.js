@@ -16,7 +16,6 @@ export async function GET(request) {
       .sort({ timestamp: -1 })
       .toArray();
 
-      console.log(entries)
     return new Response(JSON.stringify({ entries }), {
       status: 200,
       headers: { "Content-Type": "application/json" },

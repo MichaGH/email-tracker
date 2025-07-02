@@ -76,7 +76,6 @@ export default async function Dashboard() {
 		try {
 			const db = await getDb();
 			await db.collection("trackers").insertOne(doc);
-			console.log("Created tracker:", _id);
 		} catch (err) {
 			console.error("Error creating tracker:", err);
 		}
@@ -84,8 +83,6 @@ export default async function Dashboard() {
 
 	return (
 		<div className="p-8">
-			<h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-
 			<DashboardClient aggregatedData={aggregatedData} createTracker={createTracker} />
 		</div>
 	);

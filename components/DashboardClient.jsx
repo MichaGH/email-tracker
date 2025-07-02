@@ -10,18 +10,18 @@ function DashboardClient({aggregatedData, createTracker}) {
 
 	return (
 		<div>
-			<div className="mb-10 flex">
+            <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+			<div className="mb-10 flex justify-between ">
 				<div>
 					<h2 className="text-xl font-bold mb-4">Create Tracker</h2>
 					<CreateTrackerForm createTracker={createTracker} />
 				</div>
-				<div>
-					<h2 className="text-xl font-bold mb-4">Entries</h2>
-					<EntriesTable selectedTrackerId={selectedTrackerId} />
-				</div>
+                <div className="flex-1 flex justify-center">
+                    <EntriesTable selectedTrackerId={selectedTrackerId} />
+                </div>
 			</div>
 
-			<div>
+			<div >
 				<h2 className="text-xl font-bold mb-4">Tracking Table</h2>
 				<TrackingTable aggregatedData={aggregatedData} selectedTrackerId={selectedTrackerId}  setSelectedTrackerId={setSelectedTrackerId} />
 			</div>

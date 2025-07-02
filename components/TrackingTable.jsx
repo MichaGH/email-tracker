@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import StatusCircle from './UI/StatusCircle';
 
 function TrackingTable({ aggregatedData,selectedTrackerId, setSelectedTrackerId}) {
     
@@ -55,14 +56,24 @@ function TrackingTable({ aggregatedData,selectedTrackerId, setSelectedTrackerId}
                 className="even:bg-gray-700 cursor-pointer"
                 onClick={() => setSelectedTrackerId(_id)}
               >
-                <td className="border border-gray-600 px-4 py-2">{_id}</td>
-                <td className="border border-gray-600 px-4 py-2">{description}</td>
                 <td className="border border-gray-600 px-4 py-2">
-                  {active ? 'Yes' : 'No'}
+                    {_id}
                 </td>
-                <td className="border border-gray-600 px-4 py-2">{track ? 'Yes' : 'No'}</td>
-                <td className="border border-gray-600 px-4 py-2">{respond ? 'Yes' : 'No'}</td>
-                <td className="border border-gray-600 px-4 py-2">{source}</td>
+                <td className="border border-gray-600 px-4 py-2">
+                    {description}
+                </td>
+                <td className="border border-gray-600 px-4 py-2">
+                    <StatusCircle trackerId={_id} field="active" initialValue={active}/>
+                </td>
+                <td className="border border-gray-600 px-4 py-2">
+                     <StatusCircle trackerId={_id} field="track" initialValue={track}/>
+                </td>
+                <td className="border border-gray-600 px-4 py-2">
+                     <StatusCircle trackerId={_id} field="respond" initialValue={respond}/>
+                </td>
+                <td className="border border-gray-600 px-4 py-2">
+                    {source} 
+                </td>
                 <td className="border border-gray-600 px-4 py-2">
                   {createdAt ? createdAt.toLocaleString() : '-'}
                 </td>
@@ -73,7 +84,7 @@ function TrackingTable({ aggregatedData,selectedTrackerId, setSelectedTrackerId}
                 <td className="border border-gray-600 px-4 py-2">
                   <button
                     className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded"
-                    onClick={() => copyToClipboard(`${window.location.origin}/tracker/?id=${_id}`)}
+                    onClick={() => copyToClipboard(`${window.location.origin}/api/tracker/?id=${_id}`)}
                   >
                     Copy
                   </button>

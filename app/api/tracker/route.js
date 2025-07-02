@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-
+import path from "path";
 import { getDb } from "../../../lib/mongodb";
 import { getGeoLocation } from "../../../lib/getGeoLocation";
+import fs from 'fs/promises';
 
 const pixelBase64 = "R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
 const pixelBuffer = Buffer.from(pixelBase64, "base64");
@@ -84,16 +85,36 @@ export async function GET(request) {
         //YES
 		//! What image to respond with | default: src: 'trackingPixel'
 		let responseImage;
-		if (existingTracker.src === "trackingPixel") {
+        let contentType = "image/gif";
+        const source = existingTracker.source;
+
+		if (source === "trackingPixel") {
 			responseImage = pixelBuffer;
 		} else {
-			// specific image path
+			const imagePath = path.join(process.cwd(), "public", "tracker", "images", source);
+
+            try {
+                responseImage = await fs.readFile(imagePath)
+
+                // Detect content type from extension
+                if (source.endsWith(".png")){
+                    contentType = "image/png"
+                } else if (source.endsWith(".jpg") || source.endsWith(".jpeg")){
+                    contentType = "image/jpeg"
+                } else if (source.endsWith(".gif")){
+                    contentType = "image/gif"
+                } else {
+                    contentType = "application/octet-stream"
+                }
+            } catch (e) {
+
+            }
 		}
 
 		return new Response(responseImage, {
 			status: 200,
 			headers: {
-				"Content-Type": "image/gif",
+				"Content-Type": contentType,
 				"Cache-Control": "no-cache, no-store, must-revalidate",
 				Pragma: "no-cache",
 				Expires: 0,
